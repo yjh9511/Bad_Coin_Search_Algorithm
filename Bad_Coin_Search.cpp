@@ -95,15 +95,15 @@ int main(){
 		b[0] = dummyA[1];
 
 		switch (balance(a, b, c)) {
-		case EQUAL_ALL:		// 5 5 5 or 7 7 7
+		case EQUAL_ALL:			// 5 5 5 or 7 7 7
 			dummyA[j] = 99;
 			j = j + 1;
 			break;
-		case EQUAL_ONETWO:	// 7 7 5
+		case EQUAL_ONETWO:		// 7 7 5
 			dummyB[k] = 99;
 			k = k + 1;
 			break;
-		case THREE:			// 5 5 7
+		case THREE:				// 5 5 7
 			dummyB[j] = 99;
 			k = k + 1;
 			pivot_bool_test = FALSE;
@@ -116,11 +116,11 @@ int main(){
 	else {
 		b[0] = dummyB[1];
 		switch (balance(a, b, c)) {
-		case ONE: // 7 5 5
+		case ONE:				// 7 5 5
 			dummyB[k] = 99;
 			k = k + 1;
 			break;
-		case TWO: // 5 7 5
+		case TWO:				// 5 7 5
 			dummyA[j] = 99;
 			j = j + 1;
 			pivot_bool_test = FALSE;
@@ -129,7 +129,7 @@ int main(){
 			dummyA[j] = 99;
 			j = j + 1;
 			break;
-		case EQUAL_TWOTHREE: // 5 7 7
+		case EQUAL_TWOTHREE:	 // 5 7 7
 			dummyB[k] = 99;
 			k = k + 1;
 			pivot_bool_test = FALSE;
