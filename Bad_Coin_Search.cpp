@@ -48,26 +48,21 @@ int main(){
 			break;
 		case TWO:				// 5 7 5
 			pivot_bool_test = FALSE;
-
 			dummyA[j] = c[0];
 			j = j + 1;
-
 			dummyB[k] = b[0];
 			k = k + 1;
 			break;
 		case THREE:				// 5 5 7
 			pivot_bool_test = FALSE;
-
 			dummyA[j] = b[0];
 			j = j + 1;
-
 			dummyB[k] = c[0];
 			k = k + 1;
 			break;
 		case EQUAL_ONETWO:		// 7 7 5
 			dummyA[j] = b[0];
 			j = j + 1;
-
 			dummyB[k] = c[0];
 			k = k + 1;
 			break;
@@ -80,7 +75,6 @@ int main(){
 		case EQUAL_ONETHREE:	// 7 5 7
 			dummyA[j] = c[0];
 			j = j + 1;
-
 			dummyB[k] = b[0];
 			k = k + 1;
 			break;
