@@ -513,7 +513,7 @@ int main(){
 				unsure_sec_count = unsure_sec_count + 3;
 				break;
 			default:
-				printf("정의되지 않은 결과196");
+				printf("정의되지 않은 결과");
 				break;
 			}
 		}
@@ -789,14 +789,6 @@ int main(){
 
 	qsort(bad_coin, bad_count, sizeof(int), compare);
 	qsort(normal_coin, normal_count, sizeof(int), compare);
-	
-	for (i = 0; i < bad_count; i++) {
-		printf("%d  ,", bad_coin[i]);
-	}
-
-	for (i = 0; i < normal_count; i++) {
-		printf("%d  ,", normal_coin[i]);
-	}
 
 	bad_coin[bad_count] = -1;
 	b[0] = -1;
