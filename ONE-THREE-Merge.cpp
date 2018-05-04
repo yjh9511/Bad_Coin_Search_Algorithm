@@ -41,7 +41,7 @@ int main(){
 
 
 	//불량동전을 초기화한다. 이때 불량동전의 발생 확률 = 10
-	initialize(40);
+	initialize(60);
 
 	for (i = 0; i < 99; i=i+3) {
 		a[0] = i;
@@ -409,14 +409,13 @@ int main(){
 						}
 						break;
 					default:
-						printf("정의되지 않은 결과\n");
+						printf("정의되지 않은 결과");
 						break;
 					}
 				}
 				break;
 			}
 		}
-
 	}
 
 	percentage = ((float)bad_count / (float)(bad_count + normal_count))*100;
@@ -674,11 +673,13 @@ int main(){
 		case EQUAL_ONETWO:
 			bad_coin[bad_count] = 99;
 			bad_count = bad_count + 1;
+			break;
 		case EQUAL_ALL:
 			normal_coin[normal_count] = 99;
 			normal_count = normal_count + 1;
+			break;
 		default:
-			printf("정의되지 않은 결과");
+			printf("정의되지 않은 결과\n");
 			break;
 		}
 	}
