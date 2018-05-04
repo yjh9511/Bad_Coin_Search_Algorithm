@@ -1,0 +1,477 @@
+
+#include "stdio.h"
+#include "balance.h"
+#include "windows.h"
+
+#define TURE 1
+#define FALSE 0
+
+/*
+항상 51 회 탐색으로 불량동전을 탐색하는 알고리즘
+
+* 조건
+최소 1개 이상의 동전이 불량이다.
+모든 동전이 불량이거나, 정상인 경우는 제외한다
+
+* 동작 방법
+1. 동전 세트의 0번 인덱스를 pivot으로 잡는다.
+2. pivot위치의 동전은 dummyA 배열의 0번 인덱스에 저장한다.
+3. pivot과 i(초기 i는 1), i+1번 인덱스의 무게를 비교한다.
+4. pivot과 무게가 같으면 dummyA, 다르면 dummyB에 들어간다.
+5. i값이 2씩 증가하므로 마지막 인덱스 99의 경우는 피봇, 인덱스 99, dummyA와 dummyB중 길이가 긴 배열의 인덱스 1값과 비교한다.
+6. 무게 비교 과정에서 pivot 위치의 동전이 확실하게 불량이라고 판단되면 pivot_bool_test 값을 FALSE로 세팅한다.
+7. pivot_bool_test 값으로 dummyA와 dummyB중 어떤 것이 불량동전으로 이루어진 배열인지 판단하여 마지막 balance를 수행한다.
+*/
+
+
+int d1[2] = { 0,-1 };
+int d2[2] = { 0,-1 };
+int d3[2] = { 0,-1 };
+
+int a[2] = { 0, -1 };
+int b[2] = { 1, -1 };
+int c[2] = { 2, -1 };
+
+int d[4] = { 0,0,0,-1 };
+
+int dummyA[100];//무게가 7인 동전을 넣은 배열
+int dummyB[100];//무게가 5인 동전을 넣은 배열
+int dummyC[100];//무게가 같은 동전을 넣은 배열
+int dummyD[100];//무게가 같은 동전을 넣은 배열
+
+
+int l = 0, j = 0, k = 0;
+int i = 0,h=0;
+
+int dummySet(int set[]);
+void compareAllCase(int result, int check);
+void allNormalCoin(int set[]);
+void allBadCoin(int set[]);
+
+int main() {
+
+	int signal = 0;//
+	int pivot_bool_test = TRUE;
+
+	initialize(40);	// 불량동전을 초기화
+
+
+	for (i = 0; i < 98; i = i + 3) {//인덱스 98까지 분류
+		a[0] = i;
+		b[0] = i + 1;
+		c[0] = i + 2;
+		// 무게가 같은 인덱스 끼리 분류
+		switch (balance(a, b, c)) {
+		case ONE:				// 7 5 5
+			compareAllCase(ONE, 0);
+			break;
+		case TWO:				// 5 7 5
+			compareAllCase(TWO, 0);
+			break;
+		case THREE:				// 5 5 7
+			compareAllCase(THREE, 0);
+			break;
+		case EQUAL_ONETWO:		// 7 7 5
+			compareAllCase(EQUAL_ONETWO, 0);
+			break;
+		case EQUAL_TWOTHREE:	// 5 7 7
+			compareAllCase(EQUAL_TWOTHREE, 0);
+			break;
+		case EQUAL_ONETHREE:	// 7 5 7
+			compareAllCase(EQUAL_ONETHREE, 0);
+			break;
+		case EQUAL_ALL:			// 5 5 5 or 7 7 7
+			dummyC[l] = a[0];   //무게를 정확히 모르므로 dummyC배열에 넣는다.
+			dummyC[l + 1] = b[0];
+			dummyC[l + 2] = c[0];
+			l = l + 3;
+			break;
+		default:
+			printf("정의되지 않은 결과1\n");
+			break;
+		}
+	}
+	printf("불확정 코인이 %d개 있습니다.\n", l);
+	if (l == 3) {
+		a[0] = dummyA[0];//7
+		b[0] = dummyC[0];
+		c[0] = 99;
+		switch (balance(a,b,c)) {
+		case ONE: //7 5 5
+			for (i = 0; i < 3; i++)
+				dummyB[k + i] = dummyC[0 + i];
+			dummyB[k + 3] = 99;
+			k = k + 4;
+			break;
+		case EQUAL_ONETWO:  //7 7 5
+			for (i = 0; i < 3; i++)
+				dummyA[j + i] = dummyC[0 + i];
+			dummyB[k] = 99;
+			k = k + 1;
+			j = j + 3;
+			break;
+		case EQUAL_ONETHREE:	// 7 5 7
+			for (i = 0; i < 3; i++)
+				dummyB[k + i] = dummyC[0 + i];
+			k = k + 3;
+			dummyA[j] = 99;
+			j = j + 1;
+			break;
+		case EQUAL_ALL: //7 7 7
+			for (i = 0; i < 3; i++)
+				dummyA[j + i] = dummyC[0 + i];
+			dummyA[j+3] = 99;
+			j = j + 4;
+			break;
+		default: 
+			printf("정의되지 않은 값입니다.");
+			break;
+		}
+	}
+	for (int m = 0; m < l - 1; m = m + 9) {//m인덱스를 3개씩 묶어 3개 비교
+		if (m + 6 == l ) {//c에 99인덱스
+			a[0] = dummyC[m];//
+			b[0] = dummyC[m+3];
+			c[0] = 99;
+			signal = 1;
+		}
+		else if (m + 3 == l) {
+			a[0] = dummyA[0];//7
+			b[0] = dummyC[m];
+			c[0] = 99;
+			signal = 2;
+		}
+		else {
+			a[0] = dummyC[m];
+			b[0] = dummyC[m+3];
+			c[0] = dummyC[m + 6];
+		}
+		switch (balance(a, b, c)) {
+		case ONE:  // 7 5 5
+			if (signal == 1) {
+				for (i = 0; i < 3; i++)
+					dummyA[j + i] = dummyC[m + i];
+				j = j + 3;
+				for (i = 0; i < 3; i++)
+					dummyB[k + i] = dummyC[m + i+3];
+				dummyB[k + 3] = 99;
+				k = k + 4;
+				break;
+			}
+			else if (signal == 2) {
+				for (i = 0; i < 3; i++)
+					dummyB[k + i] = dummyC[m + i];
+				dummyB[k + 3] = 99;
+				k = k + 4;
+				break;
+			}
+			for (i = 0; i < 3; i++)
+				dummyA[j + i] = dummyC[m + i];
+			j = j + 3;
+			for (i = 0; i < 6; i++)
+				dummyB[k + i] = dummyC[m + i + 3];
+			k = k + 6;
+			break;
+		case TWO:  //5 7 5
+			if (signal == 1) {
+				for (i = 0; i < 3; i++)
+					dummyB[k + i] = dummyC[m +i];
+				dummyB[k + 3] = 99;
+				k = k + 4;
+				for (i = 0; i < 3; i++)
+					dummyA[j + i] = dummyC[m + i+3];
+				j = j + 3;
+				break;
+			}
+			for (i = 0; i < 3; i++)
+				dummyB[k + i] = dummyC[m + i];
+			k = k + 3;
+			for (i = 0; i < 3; i++)
+				dummyA[j + i] = dummyC[m + i + 3];
+			j = j + 3;
+			for (i = 0; i < 3; i++)
+				dummyB[k + i] = dummyC[m + i+6];
+			k = k + 3;
+			break;
+		case THREE:  //5 5 7
+			if (signal == 1) {
+				for (i = 0; i < 6; i++)
+					dummyB[k + i] = dummyC[m + i];
+				k = k + 6;
+				dummyA[j] = 99;
+				j = j + 1;
+				break;
+			}
+
+			for (i = 0; i < 6; i++)
+				dummyB[k + i] = dummyC[m + i];
+			k = k + 6;
+			for (i = 0; i < 3; i++)
+				dummyA[j + i] = dummyC[m + i + 6];
+			j = j + 3;
+			break;
+		case EQUAL_ONETWO:  // 7 7 5
+			if (signal == 1) {
+				for (i = 0; i < 6; i++)
+					dummyA[j + i] = dummyC[m + i];
+				j = j + 6;
+				dummyB[k] = 99;
+				k = k + 1;
+				break;
+			}
+			else if (signal == 2) {
+				for (i = 0; i < 3; i++)
+					dummyA[j + i] = dummyC[m + i];
+				dummyB[k] = 99;
+				k = k + 1;
+				j = j + 3;
+				break;
+			}
+			for (i = 0; i < 6; i++)
+				dummyA[j + i] = dummyC[m + i];
+			j = j + 6;
+			for (i = 0; i < 3; i++)
+				dummyB[k + i] = dummyC[m + i+6];
+			k = k + 3;
+			break;
+		case EQUAL_TWOTHREE:   // 5 7 7
+			if (signal == 1) {
+				for (i = 0; i < 3; i++)
+					dummyB[k + i] = dummyC[m + i];
+				for (i = 0; i < 3; i++)
+					dummyA[j + i] = dummyC[m + i+3];
+				dummyA[j + 3] = 99;
+				j = j + 4;
+				k = k + 3;
+				break;
+			}
+			for (i = 0; i < 3; i++)
+				dummyB[k + i] = dummyC[m + i];
+			for (i = 0; i < 6; i++)
+				dummyA[j + i] = dummyC[m + i + 3];
+			j = j + 6;
+			k = k + 3;
+			break;
+		case EQUAL_ONETHREE:   // 7 5 7
+				if (signal == 1) {
+					for (i = 0; i < 3; i++)
+						dummyA[j + i] = dummyC[m + i];
+					for (i = 0; i < 3; i++)
+						dummyB[k + i] = dummyC[m + i+3];
+					dummyA[j + 3] = 99;
+					k = k + 3;
+					j = j + 4;
+					break;
+				}
+				else if (signal == 2) {
+					for (i = 0; i < 3; i++)
+						dummyB[k + i] = dummyC[m + i];
+					k = k + 3;
+					dummyA[j] = 99;
+					j = j + 1;
+					break;
+				}
+				for (i = 0; i < 3; i++)
+					dummyA[j + i] = dummyC[m + i];
+				j = j + 3;
+				for (i = 0; i < 3; i++)
+					dummyB[k + i] = dummyC[m + i + 3];
+				for (i = 0; i < 3; i++)
+					dummyA[j + i] = dummyC[m + i+6];
+				k = k + 3;
+				j = j + 3;
+				break;
+		case EQUAL_ALL:   // 7 7 7 or 5 5 5
+			if (signal == 1) {
+				a[0] = dummyA[0];
+				b[0] = dummyA[1];
+				c[0] = 99;
+				switch (balance(a, b, c)) {// 7 7 7 or 7 7 5
+				case EQUAL_ALL:
+					for (i = 0; i < 6; i++)
+						dummyA[j + i] = dummyC[m + i];
+					dummyA[j + 6] = 99;
+					j = j + 7;
+					break;
+				case EQUAL_ONETWO:
+					for (i = 0; i < 6; i++)
+						dummyB[k + i] = dummyC[m + i];
+					dummyB[k + 6] = 99;
+					k = k + 7;
+					break;
+				default:
+					printf("정의되지않은 값입니다.");
+					break;
+				}
+				break;
+			}
+			else if (signal == 2) {
+				for (i = 0; i < 3; i++)
+					dummyA[j + i] = dummyC[m + i];
+				dummyA[j + 3] = 99;
+				j = j + 4;
+				break;
+			}
+			a[0] = dummyA[0];
+			b[0] = dummyA[1];
+			c[0] = dummyC[m];
+			switch (balance(a, b, c)) { // 7 7 7 or 7 7 5  
+			case EQUAL_ALL:
+				for (i = 0; i < 9; i++)
+					dummyA[j + i] = dummyC[m + i];
+				j = j + 9;
+				break;
+			case EQUAL_ONETWO:
+				for (i = 0; i < 9; i++)
+					dummyB[k + i] = dummyC[m + i];
+				k = k + 9;
+				break;
+			default:
+				printf("정의되지 않은 값입니다.");
+				break;
+
+			}
+			break;
+		default:
+			printf("정의되지 않은 값입니다.\n");
+			break;
+		}
+	}
+
+	// 99번째 인덱스 테스트
+	c[0] = 99;
+	a[0] = dummyA[0];
+	b[0] = dummyB[0];
+
+	if (signal ==0) {//인덱스 99를 비교 안했을 때 마지막 비교
+		switch (balance(a, b, c)) {
+		case EQUAL_ONETHREE:		// 7 5 7
+			dummyA[j] = 99;
+			j = j + 1;
+			break;
+		case ONE:				// 7 5 5
+			dummyB[k] = 99;
+			k = k + 1;
+			pivot_bool_test = FALSE;
+			break;
+		default:
+			printf("정의되지 않은 결과3\n");
+			break;
+		}
+	}
+	printf("index: ");
+	for (i = 0; i < k; i++)
+		printf("%d ", dummyB[i]);
+	printf("\n\n%d\n",k);
+
+
+	b[0] = -1;
+	c[0] = -1;
+	dummyA[j] = -1;
+	dummyB[k] = -1;
+
+	balance(dummyB, b, c);
+
+
+	system("pause");
+	return 0;
+}
+
+void compareAllCase(int result, int check) {
+	switch (result) {
+	case ONE:
+		dummyA[j] = a[0];
+		dummyB[k] = b[0];
+		dummyB[k + 1] = c[0];
+
+		j = j + 1;
+		k = k + 2;
+		break;
+	case TWO:
+		dummyA[j] = b[0];
+		dummyB[k] = a[0];
+		dummyB[k + 1] = c[0];
+
+		j = j + 1;
+		k = k + 2;
+		break;
+	case THREE:
+		dummyA[j] = c[0];
+		dummyB[k] = a[0];
+		dummyB[k + 1] = b[0];
+
+		j = j + 1;
+		k = k + 2;
+		break;
+	case EQUAL_ONETWO:
+		dummyA[j] = a[0];
+		dummyA[j + 1] = b[0];
+		dummyB[k] = c[0];
+
+		j = j + 2;
+		k = k + 1;
+		break;
+	case EQUAL_ONETHREE:
+		dummyA[j] = a[0];
+		dummyA[j + 1] = c[0];
+		dummyB[k] = b[0];
+
+		j = j + 2;
+		k = k + 1;
+		break;
+	case EQUAL_TWOTHREE:
+		dummyA[j] = b[0];
+		dummyA[j + 1] = c[0];
+		dummyB[k] = a[0];
+
+		j = j + 2;
+		k = k + 1;
+		break;
+	case EQUAL_ALL:
+		if (check == 0) {
+			dummyA[j] = a[0];
+			dummyA[j + 1] = b[0];
+			dummyA[j + 2] = c[0];
+
+			j = j + 3;
+		}
+		else if (check == 1) {
+			dummyB[k] = a[0];
+			dummyB[k + 1] = b[0];
+			dummyB[k + 2] = c[0];
+
+			k = k + 3;
+		}
+		else
+			printf("정의되지 않은 결과");
+		break;
+	default:
+		printf("정의되지 않은 결과");
+		break;
+	}
+}
+
+int dummySet(int set[]) {
+	d1[0] = set[0];
+	d2[0] = set[1];
+	d3[0] = set[2];
+
+	return balance(d1, d2, d3);
+}
+void allNormalCoin(int set[]) {
+	int i = 0;
+
+	for (i = 0; i < 3; i++) {
+		dummyA[j] = set[i];
+		j = j + 1;
+	}
+}
+
+void allBadCoin(int set[]) {
+	int i = 0;
+
+	for (i = 0; i < 3; i++) {
+		dummyB[k] = set[i];
+		k = k + 1;
+	}
+}
